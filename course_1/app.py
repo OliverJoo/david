@@ -19,6 +19,10 @@ def about():
 def menu():
     return render_template("menu.html")
 
+@app.route("/test2")
+def test2():
+    return render_template('test2.html')
+    
 if __name__ == "__main__":
     app.run(debug=True, port=5001) 
     # app.run(host='0.0.0.0', port=5001) 
