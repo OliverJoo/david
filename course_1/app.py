@@ -4,7 +4,7 @@ import socket
 app = Flask(__name__)
 
 @app.route("/")
-def home():
+def home(): 
     if app.debug:
         hostname = '컴퓨터(인스턴스) : ' + socket.gethostname()
     else:
