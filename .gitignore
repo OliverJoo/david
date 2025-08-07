@@ -4,6 +4,7 @@
 ## Custom added ###
 .DS_Store
 data_source/
+result/
 
 ### Flask ###
 instance/*
