@@ -25,8 +25,8 @@ def process_log_file(file_path, encoding='utf-8') -> tuple:
     except FileNotFoundError:
         print(f'Error: {file_path} not found')
         return [], [], {}
-    except UnicodeDecodeError:
-        print(f'Error: File Decoding({encoding}) Error occurs')
+    except UnicodeError as e:
+        print(f'파일 인코딩 관련 에러: {e}')
         return [], [], {}
     except Exception as e:
         print(f'Unexpected error: {e}')
@@ -48,8 +48,8 @@ def process_log_file(file_path, encoding='utf-8') -> tuple:
         print(f'JSON 저장 완료: {JSON_FILE}')
     except FileNotFoundError as e:
         print(f'파일 또는 경로 에러: {e}')
-    except UnicodeEncodeError:
-        print(f'파일 저장 중 인코딩 에러 발생({encoding})')
+    except UnicodeError as e:
+        print(f'파일 인코딩 관련 에러: {e}')
     except TypeError as e:
         print(f'JSON 직렬화 에러: {e}')   # log_dict의 value가 인코딩 불가 객체일때
     except Exception as e:
@@ -65,8 +65,8 @@ def make_markdown_report(file_path, encoding='utf-8'):
     except FileNotFoundError:
         print(f'Error: {file_path} not found')
         return
-    except UnicodeDecodeError:
-        print(f'Error: File Decoding({encoding}) Error occurs')
+    except UnicodeError as e:
+        print(f'파일 인코딩 관련 에러: {e}')
         return
     except Exception as e:
         print(f'Unexpected Error: {e}')
@@ -116,8 +116,8 @@ def make_markdown_report(file_path, encoding='utf-8'):
     except FileNotFoundError as e:
         print(f'파일 또는 경로 에러: {e}')
         return
-    except UnicodeDecodeError:
-        print(f'Error: File Decoding({encoding}) Error occurs')
+    except UnicodeError as e:
+        print(f'파일 인코딩 관련 에러: {e}')
         return
     except Exception as e:
         print(f'보고서 저장 오류: {e}')
@@ -143,6 +143,8 @@ def advanced_functions(log_dict, encoding='utf-8'):
         print(f'\n위험 로그가 {DANGER_FILE}에 저장되었습니다.')
     except FileNotFoundError as e:
         print(f'파일 또는 경로 에러: {e}')
+    except UnicodeError as e:
+        print(f'파일 인코딩 관련 에러: {e}')
     except Exception as e:
         print(f'Unexpected Error: {e}')
 
@@ -153,7 +155,7 @@ def advanced_functions(log_dict, encoding='utf-8'):
         print(f'Error: {JSON_FILE} not found')
         return
     except json.JSONDecodeError:
-        print(f'Error: JSON 파일 형식이 올바르지 않습니다.')
+        print(f'JSON 파일 형식이 올바르지 않습니다.')
         return
     except Exception as e:
         print(f'Unexpected Error: {e}')
