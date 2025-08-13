@@ -32,7 +32,7 @@ def solution(video_len, pos, op_start, op_end, commands):
 
 # prev: move backward 10s, min 0s
 # next: move forward 10s, min max_playtime
-# skipping opening : if op_start ≤ 현재 재생 위치 ≤ op_end, move op_end
+# skipping opening : if op_start ≤ current position ≤ op_end, move op_end
 
 if __name__ == '__main__':
     print(solution("34:33", "13:00", "00:55", "02:55", ["next", "prev"]))
