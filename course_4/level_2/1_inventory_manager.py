@@ -170,7 +170,8 @@ def save_sorted_to_binary(items: List[Dict[str, Any]], path: str) -> bool:
     try:
         with open(path, 'wb') as f:
             # struct.pack format
-            # <: 리틀 엔디안(Little Endian) 바이트 순서 지정
+            # <: 리틀 엔디안(Little Endian) 바이트 순서 지정 | >: 빅 엔디안
+
             # i: 4바이트 부호있는 정수(signed integer)
             # I: 4바이트 부호없는 정수(unsigned integer)
             # d: 8바이트 배정밀도 부동소수점(double precision float)
