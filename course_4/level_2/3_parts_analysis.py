@@ -176,7 +176,7 @@ def reload_and_transpose(path: str) -> Tuple[np.ndarray, np.ndarray]:
     return parts2, parts3
 
 
-def main() -> None:
+def run_analysis() -> None:
     print('[Mars 부품 데이터 통합 분석]')
     arrs = [load_csv_as_ndarray(p) for p in SRC_FILES]
 
@@ -212,6 +212,29 @@ def main() -> None:
         print(np.array2string(parts3, precision=3))
         print()
         print(f'last : {parts2}')
+
+
+def main() -> None:
+    """반복 실행 메인 루프"""
+    while True:
+        try:
+            run_analysis()
+        except KeyboardInterrupt:
+            print('\n[정보] 사용자에 의해 중단되었습니다.')
+            break
+        except Exception as e:
+            print(f'[에러] 분석 중 오류 발생: {e}')
+
+        # 사용자 입력으로 계속/종료 결정
+        print('\n' + '=' * 50)
+        try:
+            cmd = input('계속 진행하려면 y, 종료하려면 q: ').strip().lower()
+            if cmd == 'q':
+                print('프로그램을 종료합니다.')
+                break
+        except (KeyboardInterrupt, EOFError):
+            print('\n프로그램을 종료합니다.')
+            break
 
 if __name__ == '__main__':
     main()
