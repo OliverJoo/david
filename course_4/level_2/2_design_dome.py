@@ -1,113 +1,101 @@
 import math
-from typing import Tuple, Dict, Any
+import sys
 
-LAST_RESULT: Dict[str, Any] = {
-    'material': None,
-    'diameter': None,
-    'thickness': None,
-    'area': None,
-    'weight_kg_mars': None,
-}
-
-DENSITY_G_CM3 = {
-    'glass': 2.4,
-    'aluminum': 2.7,
-    'carbon_steel': 7.85,
-}
-
-MARS_G_RATIO = 0.38
-GRAM_TO_KG = 0.001
 CM_TO_M = 0.01
+MARS_GRAVITY_RATIO = 0.38  # 화성 중력 비율 (지구 대비 약 0.38배)
+DENSITY_G_CM3 = {
+    "glass": 2.4,
+    "aluminum": 2.7,
+    "carbon_steel": 7.85
+}
+MATERIAL_KO = {
+    "glass": "유리",
+    "aluminum": "알루미늄",
+    "carbon_steel": "탄소강"
+}
 
-class DomeInputError(ValueError):
-    pass
+def sphere_area(diameter: float) -> float:
+    """전체 구의 겉넓이 (m²)"""
+    radius = diameter / 2.0
+    return 2.0 * math.pi * (radius ** 2) # 반구체 계산
+    # return 4.0 * math.pi * (radius ** 2) # 구체 전체 계산
 
-def is_number_str(s: str) -> bool:
-    if s is None:
-        return False
-    s = s.strip()
-    if s == '':
-        return False
-    # 음수/소수 허용
-    if s[0] in '+-':
-        s2 = s[1:]
-    else:
-        s2 = s
-    return s2.replace('.', '', 1).isdigit()
 
-def validate_inputs(material: str, diameter_m: float, thickness_cm: float) -> None:
-    if material not in DENSITY_G_CM3:
-        raise DomeInputError(f'허용되지 않은 재질: {material}')
-    if not (isinstance(diameter_m, (int, float)) and diameter_m > 0):
-        raise DomeInputError('지름은 양의 실수여야 합니다.')
-    if not (isinstance(thickness_cm, (int, float)) and thickness_cm > 0):
-        raise DomeInputError('두께는 양의 실수여야 합니다.')
-
-def hemisphere_curved_area(radius_m: float) -> float:
-    return 2.0 * math.pi * (radius_m ** 2)
-
-def shell_volume_cm3(radius_m: float, thickness_cm: float) -> float:
-    area_m2 = hemisphere_curved_area(radius_m)
+def sphere_weight(diameter: float, material: str, thickness_cm: float) -> float:
+    """반구 돔 무게(kg): 표면적 x 두께 x 밀도 -> 질량, 화성 중력 반영"""
+    area_m2 = sphere_area(diameter)
     thickness_m = thickness_cm * CM_TO_M
     volume_m3 = area_m2 * thickness_m
-    return volume_m3 * (100.0 ** 3)
+    # 밀도 변환: (g/cm³) → (kg/m³)  (1 g/cm³ = 1000 kg/m³)
+    density_kg_m3 = DENSITY_G_CM3[material] * 1000
+    mass_kg = area_m2 * thickness_m * density_kg_m3
+    mars_weight_kg = mass_kg * MARS_GRAVITY_RATIO
+    return mars_weight_kg
 
-def sphere_area(diameter: float, material: str, thickness: float = 1.0) -> Tuple[float, float]:
-    validate_inputs(material, diameter, thickness)
-    r_m = diameter / 2.0
-    area_m2 = hemisphere_curved_area(r_m)
-
-    density = DENSITY_G_CM3[material]
-    vol_cm3 = shell_volume_cm3(r_m, thickness)
-    mass_kg = density * vol_cm3 * GRAM_TO_KG
-    weight_kg_on_mars = mass_kg * MARS_G_RATIO
-
-    LAST_RESULT.update({
-        'material': material,
-        'diameter': diameter,
-        'thickness': thickness,
-        'area': area_m2,
-        'weight_kg_mars': weight_kg_on_mars,
-    })
-    return area_m2, weight_kg_on_mars
-
-def format_material_korean(material: str) -> str:
-    return {'glass': '유리', 'aluminum': '알루미늄', 'carbon_steel': '탄소강'}.get(material, material)
-
-def prompt_loop() -> None:
+def input_material() -> str:
+    """재질 입력과 검증"""
+    valid_materials = set(DENSITY_G_CM3.keys())
     while True:
-        print('\n[Mars 돔 구조물 설계]')
+        mat = input("재질(glass/aluminum/carbon_steel): ").strip().lower()
+        if mat in valid_materials:
+            return mat
+        print("올바른 재질(glass/aluminum/carbon_steel) 중 하나를 입력하세요.")
+
+def input_float(prompt: str, min_value: float = 0.001) -> float:
+    """float 입력과 검증"""
+    while True:
+        value_str = input(prompt).strip()
         try:
-            mat_in = input('재질(glass|aluminum|carbon_steel): ').strip().lower()
-            dia_in = input('지름(m): ').strip()
-            thk_in = input('두께(cm, 기본=1): ').strip()
+            value = float(value_str)
+            if value >= min_value:
+                return value
+            print(f"{min_value} 이상의 숫자를 입력하세요.")
+        except ValueError:
+            print("숫자를 입력하세요.")
 
-            if not is_number_str(dia_in):
-                raise DomeInputError('지름은 숫자여야 합니다.')
-            diameter = float(dia_in)
+def input_yes_no(prompt: str) -> bool:
+    """종료 여부 입력"""
+    while True:
+        answer = input(prompt + " (y/n): ").strip().lower()
+        if answer in {"y", "yes"}:
+            return True
+        elif answer in {"n", "no"}:
+            return False
+        else:
+            print("y 또는 n 으로 답변하세요.")
 
-            thickness = 1.0
-            if thk_in:
-                if not is_number_str(thk_in):
-                    raise DomeInputError('두께는 숫자여야 합니다.')
-                thickness = float(thk_in)
-
-            area_m2, weight_kg_mars = sphere_area(diameter, mat_in, thickness)
-
-            dia_out = int(diameter) if float(diameter).is_integer() else diameter
-            thk_out = int(thickness) if float(thickness).is_integer() else thickness
-            print(f"재질 ⇒ {format_material_korean(mat_in)}, 지름 ⇒ {dia_out}, 두께 ⇒ {thk_out}, "
-                  f"면적 ⇒ {area_m2:.3f}, 무게 ⇒ {weight_kg_mars:.3f} kg")
-
-        except DomeInputError as e:
-            print(f'[입력오류] {e}')
+def main():
+    print("="*50)
+    print("반구체 돔 표면적/무게 계산기 (화성 중력 반영)")
+    print("="*50)
+    while True:
+        try:
+            material = input_material()
+            diameter = input_float("돔의 지름(m): ", min_value=0.001)
+            thickness_cm = input_float("쉘 두께(cm, 기본: 1): ", min_value=0.001)
+        except KeyboardInterrupt:
+            print("\n프로그램을 종료합니다.")
+            sys.exit(0)
         except Exception as e:
-            print(f'[에러] 예기치 못한 오류: {e}')
+            print(f"예상치 못한 오류: {e}")
+            continue
 
-        cmd = input('계속(y) / 종료(q): ').strip().lower()
-        if cmd == 'q':
-            print('종료합니다.')
+        try:
+            area = sphere_area(diameter)
+            weight = sphere_weight(diameter, material, thickness_cm)
+
+            print(f"재질 ⇒ {MATERIAL_KO[material]}, "
+                  f"지름 ⇒ {int(diameter)}, "
+                  f"두께 ⇒ {int(thickness_cm)}, "
+                  f"면적 ⇒ {area:.3f}, "
+                  f"무게 ⇒ {weight:.3f} kg\n")
+        except Exception as e:
+            print(f"계산 오류: {e}")
+
+        # 반복 여부
+        if not input_yes_no("계속 계산하시겠습니까?"):
+            print("프로그램을 종료합니다.")
             break
 
-if __name__ == '__main__':
-    prompt_loop()
+if __name__ == "__main__":
+    main()

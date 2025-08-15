@@ -244,6 +244,7 @@ def main() -> None:
 
         save_danger_csv(dangerous, DANGER_CSV)
 
+        # 보너스
         if sorted_items:
             if save_sorted_to_binary(sorted_items, BINARY_FILE):
                 loaded = read_binary_inventory(BINARY_FILE)
