@@ -50,6 +50,7 @@ def load_csv_as_ndarray(path: str) -> np.ndarray:
         # 전부 NaN인 열 제거
         try:
             col_all_nan = np.isnan(arr).all(axis=0)
+            # print(f'전부 NaN인 열 제거 :{col_all_nan} \n')
             if col_all_nan.any():
                 arr = arr[:, ~col_all_nan]
         except Exception:
@@ -60,12 +61,13 @@ def load_csv_as_ndarray(path: str) -> np.ndarray:
         try:
             if arr.size > 0 and arr.shape[1] > 0:
                 row_all_nan = np.isnan(arr).all(axis=1)
+                # print(f'전부 NaN인 행 제거 :{row_all_nan} \n')
                 if row_all_nan.any():
                     arr = arr[~row_all_nan]
         except Exception:
             pass
 
-        # 열이 0개가 되면 빈 배열 반환
+        # 요소, 행, 열의 각각의 개수가 0 인지 체크
         if arr.size == 0 or arr.shape[1] == 0 or arr.shape[0] == 0:
             return np.empty((0, 0), dtype=float)
 
@@ -91,11 +93,11 @@ def merge_arrays(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     min_cols = min(cols_a, cols_b)
 
     if min_cols == 0:
-        print(f'[경고] 병합 불가: 공통 열이 0개입니다. a={a.shape}, b={b.shape}')
+        # print(f'[경고] 병합 불가: 공통 열이 0개입니다. a={a.shape}, b={b.shape}')
         return np.empty((0, 0), dtype=float)
 
     if cols_a != cols_b:
-        print(f'[정보] 열 수 불일치: {cols_a} vs {cols_b} → {min_cols}열로 정렬')
+        # print(f'[정보] 열 수 불일치: {cols_a} vs {cols_b} → {min_cols}열로 정렬')
         a = a[:, :min_cols]
         b = b[:, :min_cols]
 
@@ -112,6 +114,7 @@ def compute_column_means(parts: np.ndarray) -> np.ndarray:
         return np.array([], dtype=float)
     if np.isnan(parts).all():
         return np.array([], dtype=float)
+    # print(f'np shape : {np.shape(parts)}')
     return np.nanmean(parts, axis=0)
 
 
@@ -160,6 +163,8 @@ def save_csv_safely(arr: np.ndarray, path: str) -> bool:
         np.savetxt(path, arr, delimiter=',', fmt='%.3f')
         print(f'[정보] 저장 완료: {path}')
         return True
+    except (IOError, OSError) as e:
+        print(f'[에러] 파일 저장에 실패했습니다({path}): {e}')
     except Exception as e:
         print(f'[에러] 저장 실패({path}): {e}')
         return False
@@ -201,11 +206,12 @@ def main() -> None:
     # 보너스: 재로딩 후 전치
     parts2, parts3 = reload_and_transpose(OUT_FILE)
     if parts2.size > 0:
-        print('--- parts2 (재로딩) ---')
+        print('--- parts2 (재로딩 출력) ---')
         print(np.array2string(parts2, precision=3))
-        print('--- parts3 (전치) ---')
+        print('--- parts3 (전치 행렬) ---')
         print(np.array2string(parts3, precision=3))
-
+        print()
+        print(f'last : {parts2}')
 
 if __name__ == '__main__':
     main()
