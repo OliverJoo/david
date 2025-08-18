@@ -55,7 +55,7 @@ class DummySensor:
         try:
             log_file_path = os.path.join('result', 'mars_base_env_log.txt')
             with open(log_file_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps(log_data, ensure_ascii=False) + '\n')
+                f.write(json.dumps(log_data, ensure_ascii=False, indent=2) + '\n')
         except IOError as e:
             print(f'로그 파일 기록 실패: {e}')
         return self.env_values.copy()
@@ -159,9 +159,9 @@ class MissionComputer:
         """실시간 부하 정보 수집 및 JSON 출력"""
         try:
             load_info = {
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 'cpu_usage_percent': self._get_cpu_usage(),
-                'memory_usage_percent': self._get_memory_usage(),
-                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                'memory_usage_percent': self._get_memory_usage()
             }
 
             print('=== 미션 컴퓨터 부하 정보 ===')
