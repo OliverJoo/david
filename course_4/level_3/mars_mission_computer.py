@@ -75,7 +75,7 @@ class MissionComputer:
         }
         self.ds = DummySensor()
         self.data_history = []
-        self.last_average_time = time.time()
+        self.last_average_time = time.time() - 300
 
     def get_sensor_data(self):
         """센서 데이터를 5초마다 수집하여 JSON으로 출력"""
@@ -92,9 +92,12 @@ class MissionComputer:
                 print(json.dumps(self.env_values, indent=2, ensure_ascii=False))
                 print(f'업데이트 시간: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
 
-                # 5분 평균 계산
-                if time.time() - self.last_average_time >= 300:
+                # 5분(300초)마다 평균 계산
+                now = time.time()
+
+                if now - self.last_average_time >= 300:
                     self._calculate_5min_average()
+                    self.last_average_time = now
 
                 print('-' * 50)
 
@@ -129,7 +132,7 @@ class MissionComputer:
         print('-' * 50)
 
         self.data_history = []
-        self.last_average_time = time.time()
+        self.data_history = self.data_history[-50:]
 
     def get_mission_computer_info(self) -> Dict:
         """시스템 정보 수집 및 JSON 출력"""
@@ -221,6 +224,7 @@ class MissionComputer:
             elif system == 'Darwin':
                 result = subprocess.check_output(['vm_stat'], text=True)
                 pages = {}
+                page_size = 4096  # macOS 기본: 4KB
 
                 for line in result.splitlines():
                     if ':' in line:
@@ -233,14 +237,28 @@ class MissionComputer:
                             except ValueError:
                                 continue
 
-                free_pages = pages.get('Pages free', 0)
-                inactive_pages = pages.get('Pages inactive', 0)
-                active_pages = pages.get('Pages active', 0)
-                wired_pages = pages.get('Pages wired down', 0)
+                # free_pages = pages.get('Pages free', 0)
+                # inactive_pages = pages.get('Pages inactive', 0)
+                # active_pages = pages.get('Pages active', 0)
+                # wired_pages = pages.get('Pages wired down', 0)
+                # total_pages = free_pages + inactive_pages + active_pages + wired_pages
 
-                total_pages = free_pages + inactive_pages + active_pages + wired_pages
+                free = pages.get('Pages free', 0)
+                active = pages.get('Pages active', 0)
+                inactive = pages.get('Pages inactive', 0)
+                speculative = pages.get('Pages speculative', 0)
+                wired = pages.get('Pages wired down', 0)
+                purgeable = pages.get('Pages purgeable', 0)
+                file_backed = pages.get('File-backed pages', 0)
+                compressed = pages.get('Pages occupied by compressor', 0)
+                total_pages = (free + active + inactive + speculative + wired) * page_size
+
+                # print(f'memory total info: free_pages: {free_pages} | inactive_pages: {inactive_pages} | active_pages: {active_pages} | wired_pages: {wired_pages} | total_pages: {total_pages}\npages:{pages}')
+
                 if total_pages > 0:
-                    used_pages = active_pages + wired_pages
+                    # used_pages = active_pages + wired_pages
+                    used_pages = (active + wired + compressed) * page_size
+                    # print(f'memory check : {used_pages} / {total_pages} = {round(used_pages / total_pages * 100, 1)}')
                     return round(used_pages / total_pages * 100, 1)
 
         except Exception as e:
@@ -439,7 +457,7 @@ def run_multithreaded():
             if ready:
                 user_input = sys.stdin.readline().strip().lower()
                 if user_input == 'q':
-                    print('q 입력 감지, 종료합니다.')
+                    print('System stopped....')
                     break
     except KeyboardInterrupt:
         pass
@@ -474,7 +492,7 @@ def run_multiprocessing():
             if ready:
                 user_input = sys.stdin.readline().strip().lower()
                 if user_input == 'q':
-                    print('q 입력 감지, 종료합니다.')
+                    print('System stopped....')
                     stop_evt.set()
                     break
     except KeyboardInterrupt:
