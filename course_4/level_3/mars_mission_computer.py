@@ -58,7 +58,10 @@ class DummySensor:
                 f.write(json.dumps(log_data, ensure_ascii=False, indent=2) + '\n')
         except IOError as e:
             print(f'로그 파일 기록 실패: {e}')
+        except Exception as e:
+            print(f'Unexpected Error: {e}')
         return self.env_values.copy()
+
 
 
 class MissionComputer:
@@ -92,12 +95,20 @@ class MissionComputer:
                 print(json.dumps(self.env_values, indent=2, ensure_ascii=False))
                 print(f'업데이트 시간: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
 
-                # 5분(300초)마다 평균 계산
+                # 5분(300초)마다 평균 계산 - 디버깅 출력을 조건문 밖으로 이동
                 now = time.time()
+                time_diff = now - self.last_average_time
+                print(f'시간 체크: 경과시간 {time_diff:.1f}초 (5분={300}초)')
+                print(f'데이터 히스토리 개수: {len(self.data_history)}개')
 
-                if now - self.last_average_time >= 300:
+                if time_diff >= 300:  # 5분 = 300초
+                    print('>>> 5분 경과! 평균 계산 시작')
                     self._calculate_5min_average()
                     self.last_average_time = now
+                    print('>>> 평균 계산 완료')
+                else:
+                    remaining = 300 - time_diff
+                    print(f'>>> 5분까지 {remaining:.1f}초 남음')
 
                 print('-' * 50)
 
@@ -131,7 +142,6 @@ class MissionComputer:
         print(f'평균 계산 시간: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
         print('-' * 50)
 
-        self.data_history = []
         self.data_history = self.data_history[-50:]
 
     def get_mission_computer_info(self) -> Dict:
@@ -315,21 +325,23 @@ class MissionComputer:
 
     def _load_settings(self):
         """setting.txt 파일 로드"""
-        setting_file_path = os.path.join('result', 'setting.txt')
 
         try:
+            setting_file_path = os.path.join('result', 'setting.txt')
+
             if not os.path.exists(setting_file_path):
                 self._create_default_settings()
 
             with open(setting_file_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
+        except IOError as e:
+            print(f'설정 파일 읽기 실패: {e}')
         except Exception as e:
-            print(f'설정 파일 로드 실패: {e}')
+            print(f'Unexpected Error: {e}')
             return None
 
     def _create_default_settings(self):
         """기본 setting.txt 파일 생성"""
-        setting_file_path = os.path.join('result', 'setting.txt')
 
         default_settings = {
             'system_info': {
@@ -339,10 +351,13 @@ class MissionComputer:
             }
         }
         try:
+            setting_file_path = os.path.join('result', 'setting.txt')
             with open(setting_file_path, 'w', encoding='utf-8') as f:
                 json.dump(default_settings, f, indent=2, ensure_ascii=False)
-        except Exception as e:
+        except IOError as e:
             print(f'설정 파일 생성 실패: {e}')
+        except Exception as e:
+            print(f'Unexpected Error: {e}')
 
     def _filter_info_by_settings(self, info, settings):
         """설정에 따른 정보 필터링"""
@@ -411,32 +426,32 @@ def run_multithreaded():
     stop_evt = threading.Event()
 
     def info_thread():
-        computer = MissionComputer()
+        runComputer = MissionComputer()
         while not stop_evt.is_set():
             print('\n[THREAD-INFO] 시스템 정보 업데이트')
-            computer.get_mission_computer_info()
+            runComputer.get_mission_computer_info()
             for _ in range(200):  # 20초
                 if stop_evt.is_set():
                     return
                 time.sleep(0.1)
 
     def load_thread():
-        computer = MissionComputer()
+        runComputer = MissionComputer()
         while not stop_evt.is_set():
             print('\n[THREAD-LOAD] 부하 정보 업데이트')
-            computer.get_mission_computer_load()
+            runComputer.get_mission_computer_load()
             for _ in range(200):  # 20초
                 if stop_evt.is_set():
                     return
                 time.sleep(0.1)
 
     def sensor_thread():
-        computer = MissionComputer()
+        runComputer = MissionComputer()
         while not stop_evt.is_set():
-            computer.ds.set_env()
-            computer.env_values = computer.ds.get_env()
+            runComputer.ds.set_env()
+            runComputer.env_values = runComputer.ds.get_env()
             print('\n[THREAD-SENSOR] 센서 데이터 업데이트')
-            print(json.dumps(computer.env_values, indent=2, ensure_ascii=False))
+            print(json.dumps(runComputer.env_values, indent=2, ensure_ascii=False))
             for _ in range(50):  # 5초
                 if stop_evt.is_set():
                     return
