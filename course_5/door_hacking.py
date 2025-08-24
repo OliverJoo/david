@@ -46,11 +46,11 @@ def unlock_zip(password_list):
                     # print(f'Wrong Password: {password} | {e}')
                     pass
 
-                if idx % 1_000_000 == 0:
+                if idx % 2_500_000 == 0:
                     print(f'PID={mp.current_process().pid} | 진행상황: {idx} / {len(password_list)} | 방금 확인한 비밀번호:{password}')
 
     except Exception as e:
-        print(f"ZIP File Processing Error: {e}")
+        print(f"ZIP 파일 처리 에러: {e}")
         return None
     return None
 
@@ -59,10 +59,10 @@ def save_file(password):
     try:
         with open(UNLOCK_ZIP_SUCCESS_FILE, 'w') as f:
             f.write(password)
-        print(f'[정보] Password 저장 완료 | 파일 위치: {UNLOCK_ZIP_SUCCESS_FILE}')
+        print(f'[정보] 비밀번호 저장 완료 | 파일 위치: {UNLOCK_ZIP_SUCCESS_FILE}')
         return True
     except OSError as e:
-        print(f'[에러] Password 저장 실패: {e}')
+        print(f'[에러] 비밀번호 저장 실패: {e}')
 
 
 def read_file(file_path: str = CAESAR_PASSWORD_FILE):
@@ -70,7 +70,7 @@ def read_file(file_path: str = CAESAR_PASSWORD_FILE):
         with open(file_path, 'r', encoding='utf-8', newline='') as f:
             return json.load(f)
     except OSError as e:
-        print(f'[에러] Password 읽기 실패: {e}')
+        print(f'[에러] 비밀번호 읽기 실패: {e}')
         return None
 
 
@@ -100,7 +100,7 @@ def unlock_process():
                 worker_payloads.append(chunk)
             start_idx += chunk_size
 
-        print(f'[진행] {idx}회 프로세스 시작 | chunk_size: {base_chunk_size} | remainder: {remainder} | workers number: {len(worker_payloads)}\n')
+        print(f'[진행] {idx}회 프로세스 시작 | 배치 크기: {base_chunk_size} | 잔여 갯수: {remainder} | 작업 수: {len(worker_payloads)}\n')
 
         try:
             with mp.Pool(processes=len(worker_payloads)) as pool:
@@ -108,11 +108,11 @@ def unlock_process():
                 # password_result = [pool.apply_async(unlock_zip, (item,)) for item in worker_payloads]
                 for result in pool.imap_unordered(unlock_zip, worker_payloads, chunksize=1):
                     if result:  # 비밀번호 발견
-                        print("Password Found:", result)
+                        print(f"비밀번호 발견: {result}")
                         pool.terminate()  # 다른 워커들 즉시 종료
                         pool.join()
                         elapsed = time.time() - start_ts
-                        print(f"\n[작업 완료] {idx:,}회차 | 진행률: {idx / len(chars):.2%} | 총 소요 시간: {elapsed:.1f}s({elapsed / 60:.1f}분) | {accumulated_cnt / elapsed:,.0f}회/s")
+                        print(f"\n[작업 완료] {idx:,}회차 | 진행률: {idx/len(chars):.2%} | 총 소요 시간: {elapsed:.1f}s({elapsed / 60:.1f}분) | {accumulated_cnt / elapsed:,.0f}회/s")
                         return result
 
         except Exception as e:
