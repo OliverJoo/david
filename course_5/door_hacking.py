@@ -1,0 +1,183 @@
+import json
+import os
+import time
+import zipfile, zlib
+import itertools
+import string
+from multiprocessing import Pool, cpu_count
+import multiprocessing as mp
+
+# Password Rule: 특수 문자없이 숫자와 소문자 알파벳으로 구성된 6자리 문자
+# ENCRYPTED_ZIP_FILE = os.path.join('data_source', 'ai_file.zip') # for test
+# UNLOCK_ZIP_SUCCESS_FILE = os.path.join('result', 'ai_file_password.txt')  # q1 | # for test
+ENCRYPTED_ZIP_FILE = os.path.join('data_source', 'emergency_storage_key.zip')
+UNLOCK_ZIP_SUCCESS_FILE = os.path.join('result', 'password.txt')  # q1
+CAESAR_PASSWORD_FILE = os.path.join('data_source', 'password.txt')  # q2 | emergency_storage_key.zip 안의 password.txt
+MULTIPROCESSING_NUMB_WORKERS = cpu_count() + 4
+
+
+# emergency_storage_key.zip 의 암호 해독 코드 작성. 단 암호는 특수 문자없이 숫자와 소문자 알파벳으로 구성된 6자리 문자로 되어 있다.
+# 암호를 푸는 과정을 출력하는데 시작 시간과 반복 회수 그리고 진행 시간등을 출력한다.
+# 보너스 과제: 암호를 좀 더 빠르게 풀 수 있는 알고리즘을 제시하고 코드로 구현한다.
+def unlock_zip(password_list):
+    try:
+        with zipfile.ZipFile(ENCRYPTED_ZIP_FILE, 'r') as zf:
+            for idx, password in enumerate(password_list, 1):
+                try:
+                    if verify_password(zip_path=ENCRYPTED_ZIP_FILE, password=password):
+                        print(f'Found Password: {password} | {idx}번째 발견! | PID={mp.current_process().pid} End!')
+                        save_file(password)
+                        return password
+
+                except (RuntimeError, zipfile.BadZipFile, OSError, Exception) as e:
+                    print(f'Wrong Password: {password} | {e}')
+
+                if idx % 1_000_000 == 0:
+                    print(f'PID={mp.current_process().pid} 진행상황: {idx} / {len(password_list)} | 현재 확인한 비밀번호:{password}')
+
+    except Exception as e:
+        print(f"ZIP File Processing Error: {e}")
+        return None
+    return None
+
+
+def verify_password(zip_path=ENCRYPTED_ZIP_FILE, password='', header_read: int = 1):
+    try:
+        with zipfile.ZipFile(zip_path) as zf:
+            # 빈 ZIP 방어
+            if not zf.namelist():
+                return False
+            first = zf.namelist()[0]
+
+            # To avoid "False Positive" in ZipFile library
+            # ---------------- 1차 빠른 검사 ----------------
+            try:
+                with zf.open(first, pwd=password.encode()) as fp:
+                    fp.read(header_read)  # 헤더 일부만 읽기
+            except RuntimeError as e:
+                if "password" in str(e).lower():  # Bad password
+                    return False
+                raise
+
+            # ---------------- 2차 CRC-32 검사 ---------------
+            info = zf.getinfo(first)
+            expected_crc = info.CRC
+            expected_size = info.file_size
+
+            with zf.open(first, pwd=password.encode()) as fp:
+                data = fp.read()
+
+            if len(data) != expected_size:  # 길이 불일치
+                return False
+
+            return (zlib.crc32(data) & 0xFFFFFFFF) == expected_crc
+
+    except Exception:
+        return False
+
+
+def save_file(password):
+    try:
+        with open(UNLOCK_ZIP_SUCCESS_FILE, 'w') as f:
+            f.write(password)
+        print(f'[정보] Password 저장 완료 | 파일 위치: {UNLOCK_ZIP_SUCCESS_FILE}')
+        return True
+    except OSError as e:
+        print(f'[에러] Password 저장 실패: {e}')
+
+
+def read_file(file_path: str = CAESAR_PASSWORD_FILE):
+    try:
+        with open(file_path, 'r', encoding='utf-8', newline='') as f:
+            return json.load(f)
+    except OSError as e:
+        print(f'[에러] Password 읽기 실패: {e}')
+        return None
+
+
+def unlock_process():
+    chars = string.digits + string.ascii_lowercase
+    password_product = [''.join(combo) for combo in itertools.product(chars, repeat=5)]
+
+    total = len(chars) ** 6
+    start_ts = time.time()
+    start_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_ts))
+    print(f"\n[시작] {start_str} | 총 시도 예상: {total:.3e}개")
+    accumulated_cnt = 0
+
+    for idx, first_char in enumerate(chars, 1):
+        password_list = list(map(str.__add__, itertools.repeat(first_char), password_product))
+
+        base_chunk_size = len(password_list) // MULTIPROCESSING_NUMB_WORKERS
+        remainder = len(password_list) % MULTIPROCESSING_NUMB_WORKERS
+        accumulated_cnt += base_chunk_size + remainder
+
+        worker_payloads = []
+        start_idx = 0
+        for worker_idx in range(MULTIPROCESSING_NUMB_WORKERS):
+            chunk_size = base_chunk_size + (1 if worker_idx < remainder else 0)
+            chunk = password_list[start_idx:start_idx + chunk_size]
+            if chunk:
+                worker_payloads.append(chunk)
+            start_idx += chunk_size
+
+        print(
+            f'[진행] {idx}회 프로세스 시작 | chunk_size: {base_chunk_size} | remainder: {remainder} | workers number: {len(worker_payloads)}\n')
+
+        try:
+            with mp.Pool(processes=len(worker_payloads)) as pool:
+                # print(f"Starting multiprocessing with {len(worker_payloads)} processes...")
+                # password_result = pool.map(unlock_zip, worker_payloads)
+                # password_result = [pool.apply_async(unlock_zip, (item,)) for item in worker_payloads]
+                for result in pool.imap_unordered(unlock_zip, worker_payloads, chunksize=1):
+                    if result:  # 비밀번호 발견
+                        print("Password Found:", result)
+                        pool.terminate()  # 다른 워커들 즉시 종료
+                        elapsed = time.time() - start_ts
+                        print(
+                            f"\n[작업 완료] {idx:,}회차 | 진행률: {idx / len(chars):.2%} | 총 소요 시간: {elapsed:.1f}s({elapsed / 60:.1f}분) | {accumulated_cnt / elapsed:,.0f}회/s")
+                        return result
+
+        except Exception as e:
+            print(f'Unexpected Exception: {e}')
+
+        elapsed = time.time() - start_ts
+        print(
+            f"\n[진행] {idx:,}회 완료(총 {len(chars)}회) | 진행률: {idx / len(chars):.2%} | 총 소요 시간: {elapsed:.1f}s({elapsed / 60:.1f}분) | {accumulated_cnt / elapsed:,.0f}회/s")
+
+        # 테스트 목적
+        # if idx > 2:
+        #     return -1
+    return None
+
+
+# password.txt 파일을 읽어온다.
+# caesar_cipher_decode() 함수는 풀어야 하는 문자열을 파라메터로 추가한다. 이때 파라메터의 이름은 target_text으로 한다.
+# caesar_cipher_decode() 에서 자리수에 따라 암호표가 바뀌게 한다. 자리수는 알파벳 수만큼 반복한다.
+# 자리수에 따라서 해독된 결과를 출력한다.
+# 몇 번째 자리수로 암호가 해독되는지 찾아낸다. 눈으로 식별이 가능하면 해당 번호를 입력하면 그 결과를 result.txt로 저장을 한다.
+# 보너스 과제: 텍스트 사전을 만들고 사전에 있는 단어와 일치하는 키워드가 암호속에서 발견될 경우 반복을 멈출 수 있게 작성
+def caesar_cipher_decode():
+    pass
+
+
+if __name__ == '__main__':
+    try:
+        mp.set_start_method("spawn", force=True)
+
+        # 문제 1
+        print(f'success: {unlock_process()}')
+
+        # 문제 2
+        # caesar_cipher_decode()
+    except Exception as e:
+        print(f'Unexpected Exception: {e}')
+
+# 제약사항
+#
+# python에서 기본 제공되는 명령어 이외의 별도의 라이브러리나 패키지를 사용해서는 안된다.
+# 단, zip 파일을 다루는 부분은 외부 라이브러리 사용 가능하다.
+# 반복 할 때마다 결과를 눈으로 확인 할 수 있어야 한다.
+# 경고 메시지 없이 모든 코드는 실행 되어야 한다.
+# 파일을 다루는 부분은 모두 예외처리가 되어 있어야 한다.
+# 암호가 확인 되었을 때 최종 암호가 result.txt로 저장되어야 한다.
