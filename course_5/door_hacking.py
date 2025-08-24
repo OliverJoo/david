@@ -13,8 +13,7 @@ import multiprocessing as mp
 ENCRYPTED_ZIP_FILE = os.path.join('data_source', 'emergency_storage_key.zip')
 UNLOCK_ZIP_SUCCESS_FILE = os.path.join('result', 'password.txt')  # q1
 CAESAR_PASSWORD_FILE = os.path.join('data_source', 'password.txt')  # q2 | emergency_storage_key.zip 안의 password.txt
-MULTIPROCESSING_NUMB_WORKERS = cpu_count() + 4
-
+MULTIPROCESSING_NUMB_WORKERS = cpu_count()
 
 # emergency_storage_key.zip 의 암호 해독 코드 작성. 단 암호는 특수 문자없이 숫자와 소문자 알파벳으로 구성된 6자리 문자로 되어 있다.
 # 암호를 푸는 과정을 출력하는데 시작 시간과 반복 회수 그리고 진행 시간등을 출력한다.
@@ -22,58 +21,38 @@ MULTIPROCESSING_NUMB_WORKERS = cpu_count() + 4
 def unlock_zip(password_list):
     try:
         with zipfile.ZipFile(ENCRYPTED_ZIP_FILE, 'r') as zf:
+
+            file_info = zf.getinfo(zf.namelist()[0])
+
             for idx, password in enumerate(password_list, 1):
                 try:
-                    if verify_password(zip_path=ENCRYPTED_ZIP_FILE, password=password):
-                        print(f'Found Password: {password} | {idx}번째 발견! | PID={mp.current_process().pid} End!')
-                        save_file(password)
-                        return password
+                    # 1단계: 빠른 검사. 헤더 일부(1)만 읽어 암호가 맞는지 빠르게 확인합니다.
+                    with zf.open(file_info, pwd=password.encode()) as fp:
+                        first_byte = fp.read(1)
+                        full_content = first_byte + fp.read()
+
+                        # 2단계: 정밀 검사 (CRC-32). 1단계를 통과한 후보에 대해서만 실행합니다.
+                        # False Positive를 완벽하게 걸러내기 위해 파일 전체를 읽어 무결성을 검증
+                        if (zlib.crc32(full_content) & 0xFFFFFFFF) == file_info.CRC:
+                            print(f'\n[발견] PID: {os.getpid()} | {idx}번째에서 비밀번호 발견: "{password}"')
+                            save_file(password)
+                            return password
+                        else:
+                            # 매우 드문 False Positive 케이스 검증
+                            print(f'\n[경고] PID: {os.getpid()} | {idx}번째에서 False Positive 발생: "{password}"')
+                            continue
 
                 except (RuntimeError, zipfile.BadZipFile, OSError, Exception) as e:
-                    print(f'Wrong Password: {password} | {e}')
+                    # print(f'Wrong Password: {password} | {e}')
+                    pass
 
                 if idx % 1_000_000 == 0:
-                    print(f'PID={mp.current_process().pid} 진행상황: {idx} / {len(password_list)} | 현재 확인한 비밀번호:{password}')
+                    print(f'PID={mp.current_process().pid} | 진행상황: {idx} / {len(password_list)} | 방금 확인한 비밀번호:{password}')
 
     except Exception as e:
         print(f"ZIP File Processing Error: {e}")
         return None
     return None
-
-
-def verify_password(zip_path=ENCRYPTED_ZIP_FILE, password='', header_read: int = 1):
-    try:
-        with zipfile.ZipFile(zip_path) as zf:
-            # 빈 ZIP 방어
-            if not zf.namelist():
-                return False
-            first = zf.namelist()[0]
-
-            # To avoid "False Positive" in ZipFile library
-            # ---------------- 1차 빠른 검사 ----------------
-            try:
-                with zf.open(first, pwd=password.encode()) as fp:
-                    fp.read(header_read)  # 헤더 일부만 읽기
-            except RuntimeError as e:
-                if "password" in str(e).lower():  # Bad password
-                    return False
-                raise
-
-            # ---------------- 2차 CRC-32 검사 ---------------
-            info = zf.getinfo(first)
-            expected_crc = info.CRC
-            expected_size = info.file_size
-
-            with zf.open(first, pwd=password.encode()) as fp:
-                data = fp.read()
-
-            if len(data) != expected_size:  # 길이 불일치
-                return False
-
-            return (zlib.crc32(data) & 0xFFFFFFFF) == expected_crc
-
-    except Exception:
-        return False
 
 
 def save_file(password):
@@ -102,7 +81,7 @@ def unlock_process():
     total = len(chars) ** 6
     start_ts = time.time()
     start_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_ts))
-    print(f"\n[시작] {start_str} | 총 시도 예상: {total:.3e}개")
+    print(f"\n[시작] {start_str} | 총 시도 예상: {total:,}개")
     accumulated_cnt = 0
 
     for idx, first_char in enumerate(chars, 1):
@@ -121,33 +100,27 @@ def unlock_process():
                 worker_payloads.append(chunk)
             start_idx += chunk_size
 
-        print(
-            f'[진행] {idx}회 프로세스 시작 | chunk_size: {base_chunk_size} | remainder: {remainder} | workers number: {len(worker_payloads)}\n')
+        print(f'[진행] {idx}회 프로세스 시작 | chunk_size: {base_chunk_size} | remainder: {remainder} | workers number: {len(worker_payloads)}\n')
 
         try:
             with mp.Pool(processes=len(worker_payloads)) as pool:
-                # print(f"Starting multiprocessing with {len(worker_payloads)} processes...")
                 # password_result = pool.map(unlock_zip, worker_payloads)
                 # password_result = [pool.apply_async(unlock_zip, (item,)) for item in worker_payloads]
                 for result in pool.imap_unordered(unlock_zip, worker_payloads, chunksize=1):
                     if result:  # 비밀번호 발견
                         print("Password Found:", result)
                         pool.terminate()  # 다른 워커들 즉시 종료
+                        pool.join()
                         elapsed = time.time() - start_ts
-                        print(
-                            f"\n[작업 완료] {idx:,}회차 | 진행률: {idx / len(chars):.2%} | 총 소요 시간: {elapsed:.1f}s({elapsed / 60:.1f}분) | {accumulated_cnt / elapsed:,.0f}회/s")
+                        print(f"\n[작업 완료] {idx:,}회차 | 진행률: {idx / len(chars):.2%} | 총 소요 시간: {elapsed:.1f}s({elapsed / 60:.1f}분) | {accumulated_cnt / elapsed:,.0f}회/s")
                         return result
 
         except Exception as e:
             print(f'Unexpected Exception: {e}')
 
         elapsed = time.time() - start_ts
-        print(
-            f"\n[진행] {idx:,}회 완료(총 {len(chars)}회) | 진행률: {idx / len(chars):.2%} | 총 소요 시간: {elapsed:.1f}s({elapsed / 60:.1f}분) | {accumulated_cnt / elapsed:,.0f}회/s")
+        print(f"\n[진행] {idx:,}회 완료(총 {len(chars)}회) | 진행률: {idx / len(chars):.2%} | 총 소요 시간: {elapsed:.1f}s({elapsed / 60:.1f}분) | {accumulated_cnt / elapsed:,.0f}회/s\n")
 
-        # 테스트 목적
-        # if idx > 2:
-        #     return -1
     return None
 
 
