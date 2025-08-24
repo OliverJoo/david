@@ -47,7 +47,7 @@ def unlock_zip(password_list):
                     pass
 
                 if idx % 2_500_000 == 0:
-                    print(f'PID={mp.current_process().pid} | 진행상황: {idx} / {len(password_list)} | 방금 확인한 비밀번호:{password}')
+                    print(f'PID={mp.current_process().pid} | 진행상황: {idx:,} / {len(password_list):,} | 방금 확인한 비밀번호:{password}')
 
     except Exception as e:
         print(f"ZIP 파일 처리 에러: {e}")
