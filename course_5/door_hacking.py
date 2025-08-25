@@ -11,7 +11,7 @@ import multiprocessing as mp
 # ENCRYPTED_ZIP_FILE = os.path.join('data_source', 'ai_file.zip') # for test
 # UNLOCK_ZIP_SUCCESS_FILE = os.path.join('result', 'ai_file_password.txt')  # q1 | # for test
 ENCRYPTED_ZIP_FILE = os.path.join('data_source', 'emergency_storage_key.zip')
-UNLOCK_ZIP_SUCCESS_FILE = os.path.join('result', 'password.txt')  # q1
+UNLOCK_ZIP_SUCCESS_FILE = os.path.join('result', 'result.txt')  # q1
 CAESAR_PASSWORD_FILE = os.path.join('data_source', 'password.txt')  # q2 | emergency_storage_key.zip 안의 password.txt
 MULTIPROCESSING_NUMB_WORKERS = cpu_count()
 
