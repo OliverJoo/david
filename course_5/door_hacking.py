@@ -75,7 +75,7 @@ def read_file(file_path: str = CAESAR_PASSWORD_FILE):
 
 
 def unlock_process():
-    chars = string.digits + string.ascii_lowercase
+    chars = string.ascii_lowercase + string.digits
     password_product = [''.join(combo) for combo in itertools.product(chars, repeat=5)]
 
     total = len(chars) ** 6
