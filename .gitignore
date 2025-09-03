@@ -5,6 +5,8 @@
 .DS_Store
 data_source/
 result/
+CCTV/
+*.zip
 
 ### Flask ###
 instance/*
