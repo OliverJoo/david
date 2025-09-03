@@ -96,7 +96,6 @@ class ImageProcessor:
             detected_people = []
 
             for (x, y, w, h) in boxes:
-                # 검출 결과를 좀 더 정확하게 만들기 위한 조정
                 detected_people.append((x, y, w, h))
                 cv2.rectangle(result_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 cv2.putText(result_image, 'Person', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
