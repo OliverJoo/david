@@ -132,9 +132,9 @@ def _unzip_cctv_if_exists(zip_filename: str = 'cctv.zip', extract_folder: str = 
 
 
 def problem1_image_viewer():
+    print('=== 문제 1: 이미지 뷰어 ===')
     _unzip_cctv_if_exists()
 
-    print('=== 문제 1: 이미지 뷰어 ===')
     print('방향키: ← (이전), → (다음), ESC 또는 창 닫기 (종료)')
 
     processor = ImageProcessor()
@@ -177,6 +177,8 @@ def problem1_image_viewer():
                 cv2.waitKey(1)  # macOS에서 창이 확실히 닫히도록 처리
                 print('이미지 뷰어를 종료합니다.')
                 return
+            # NOTI: 처음 사진에서 왼쪽 방향 키를 누르면 ‘First picture’ 마지막 사진에서 오른쪽 방향 키를 누르면 ‘Last picture’ 메시지가 출력 된다.
+            # NOTI: 첫 사진과 마지막 사진에서 경고 메시지가 잘 출력되는지 확인하고 오류 처리가 잘 되어 있는지 확인한다.
             elif key == 81 or key == 2:  # 왼쪽 방향키
                 processor.current_index = (processor.current_index - 1 + len(processor.image_files)) % len(
                     processor.image_files)
