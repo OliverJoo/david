@@ -177,15 +177,18 @@ def problem1_image_viewer():
                 cv2.waitKey(1)  # macOS에서 창이 확실히 닫히도록 처리
                 print('이미지 뷰어를 종료합니다.')
                 return
-            # NOTI: 처음 사진에서 왼쪽 방향 키를 누르면 ‘First picture’ 마지막 사진에서 오른쪽 방향 키를 누르면 ‘Last picture’ 메시지가 출력 된다.
-            # NOTI: 첫 사진과 마지막 사진에서 경고 메시지가 잘 출력되는지 확인하고 오류 처리가 잘 되어 있는지 확인한다.
             elif key == 81 or key == 2:  # 왼쪽 방향키
-                processor.current_index = (processor.current_index - 1 + len(processor.image_files)) % len(
-                    processor.image_files)
-                break
+                if processor.current_index > 0:
+                    processor.current_index -= 1
+                    break
+                else:
+                    print('First picture')
             elif key == 83 or key == 3:  # 오른쪽 방향키
-                processor.current_index = (processor.current_index + 1) % len(processor.image_files)
-                break
+                if processor.current_index < len(processor.image_files) - 1:
+                    processor.current_index += 1
+                    break
+                else:
+                    print('Last picture')
 
 
 def problem2_people_detection():
