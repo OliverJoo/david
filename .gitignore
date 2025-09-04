@@ -7,6 +7,7 @@ data_source/
 result/
 CCTV/
 *.zip
+records/
 
 ### Flask ###
 instance/*
