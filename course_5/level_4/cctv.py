@@ -88,7 +88,7 @@ class ImageProcessor:
                 winStride=(8, 8),
                 padding=(32, 32),
                 scale=1.05,
-                hitThreshold=-0.9
+                hitThreshold=-0.95
             )
 
             # 감지된 사람 주위에 사각형 그리기
