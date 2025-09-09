@@ -182,5 +182,5 @@ if __name__ == '__main__':
 
     # 3. 고급 기능(보너스)
     # if logs and reverse_logs and log_dict:
-    if logs and log_dict:
-        advanced_functions(log_dict)
+    # if logs and log_dict:
+    #     advanced_functions(log_dict)
