@@ -139,7 +139,6 @@ def caesar_cipher_decode():
     try:
         target_text = read_file(CAESAR_PASSWORD_FILE)
         text_list = str(target_text).lower().split()
-        # print(ord('a'), chr(ord('z') + 1 - 26), ord('z')) # 97 ~ 122
     except FileNotFoundError as e:
         print(f'File Not Found: {e}')
     except ValueError as e:
