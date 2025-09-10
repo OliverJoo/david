@@ -94,7 +94,7 @@ def read_inventory_csv(path: str) -> List[Dict[str, Any]]:
                 # 제공 스키마의 'Weight (g/cm³)'는 수량이 아님. 수량 불명 시 0 처리.
                 idx_qty = None
             if idx_fi is None:
-                # 제공 스키마에서 Flammability는 마지막 컬럼₩    Å¸¸¸¸``Å⁄⁄¸¸¸⁄¸
+                # 제공 스키마에서 Flammability는 마지막 컬럼
                 if 'flammability' in header_norm:
                     idx_fi = header_norm.index('flammability')
                 elif len(header_norm) >= 5:

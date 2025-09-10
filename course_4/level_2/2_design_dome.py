@@ -25,7 +25,7 @@ def sphere_weight(diameter: float, material: str, thickness_cm: float) -> float:
     """반구 돔 무게(kg): 표면적 x 두께 x 밀도 -> 질량, 화성 중력 반영"""
     area_m2 = sphere_area(diameter)
     thickness_m = thickness_cm * CM_TO_M
-    volume_m3 = area_m2 * thickness_m
+    # volume_m3 = area_m2 * thickness_m
     # 밀도 변환: (g/cm³) → (kg/m³)  (1 g/cm³ = 1000 kg/m³)
     density_kg_m3 = DENSITY_G_CM3[material] * 1000
     mass_kg = area_m2 * thickness_m * density_kg_m3
