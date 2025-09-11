@@ -13,7 +13,7 @@ def process_log_file(file_path=LOG_FILE, encoding='utf-8'):
         print(f'Error: {file_path} not found')
         return []
     except UnicodeDecodeError as e:
-        print(f'파일 인코딩 관련 에러: {e}')
+        print(f'File Decoding Error: {e}')
         return []
     except Exception as e:
         print(f'Unexpected error: {e}')
@@ -52,7 +52,7 @@ def main():
         # print(f'\n\n=== Log - Tuple List(1) ===') # no
         # print(*log_list, sep='\n')
         # print(f'\n\n=== Log - Tuple List(2) ===') # no
-        # print('\n'.join(str(item) for item in log_list))
+        # print('[\n' + '\n  '.join(str(item) for item in log_list) + '\n]')
         print(f'\n\n=== Log - log_list:01 (original) ===')
         print(f'{log_list}')
         print(f'\n\n=== Log - log_list:02 (formatted_log_list) ===')
