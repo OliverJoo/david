@@ -37,18 +37,18 @@ def main():
 
         log_list = []
         for logs in log_origin[1:]:
-            log_data = logs.strip().strip('\n').split(',', 2)
+            log_data = logs.strip().split(',', 2)
             if len(log_data) == 3:
                 time_stamp, log_level, message = log_data
-                try:
-                    # datetime.fromisoformat(time_stamp.strip())
-                    # NOTI: datetime.strptime Exception
-                    if datetime.strptime(time_stamp.strip(), '%Y-%m-%d %H:%M:%S'):
-                        log_list.append((time_stamp.strip(), message.strip()))
-                    else:
-                        raise (TypeError, ValueError)
-                except (TypeError, ValueError) as e:
-                    print(f'====== datetime type error ======')
+                # datetime.fromisoformat(time_stamp.strip())
+                # NOTI: datetime.strptime Exception
+                if datetime.strptime(time_stamp.strip(), '%Y-%m-%d %H:%M:%S'):
+                    log_list.append((time_stamp.strip(), message.strip()))
+                else:
+                    raise (ValueError, TypeError)
+            # else:
+            #     raise RuntimeError(f'Processing Error')
+
         # print(f'\n\n=== Log - Tuple List(1) ===') # no
         # print(*log_list, sep='\n')
         # print(f'\n\n=== Log - Tuple List(2) ===') # no
@@ -66,8 +66,7 @@ def main():
         reversed_list = sorted(log_list, key=lambda x: x[0], reverse=True)
         print(reversed_list)
         print(f'\n\n=== Log - reversed list:02 (formatted_reversed_log_list) ===')
-        formatted_reversed_log_list = "[\n" + "\n".join(
-            f"  {item}{',' if i < len(reversed_list) - 1 else ''}" for i, item in enumerate(reversed_list)) + "\n]"
+        formatted_reversed_log_list = "[\n" + "\n".join(f"  {item}{',' if i < len(reversed_list) - 1 else ''}" for i, item in enumerate(reversed_list)) + "\n]"
         print(formatted_reversed_log_list)
         print(f'\n\n=== Log - reversed list:03 (pprint.pprint) ===')
         formatted_reversed_log_list_pprint = pprint.pformat(reversed_list, width=120)
@@ -77,8 +76,7 @@ def main():
         dict_result = dict(reversed_list)
         print(dict_result)
         print(f'\n\n=== dictionary type:02 (formatted_log_dict) ===')  # 2nd try
-        formatted_dict_result = "{\n" + "\n".join(f"  '{k}': '{v}'{',' if i < len(dict_result) - 1 else ''}"
-            for i, (k, v) in enumerate(dict_result.items())) + "\n}"
+        formatted_dict_result = "{\n" + "\n".join(f"  '{k}': '{v}'{',' if i < len(dict_result) - 1 else ''}" for i, (k, v) in enumerate(dict_result.items())) + "\n}"
         print(formatted_dict_result)
         print(f'\n\n=== dictionary type:03 (pprint.pprint) ===')
         dict_result_pprint = pprint.pformat(dict_result,  width=120)
@@ -87,7 +85,10 @@ def main():
         dict_result_json_dumps = json.dumps(dict_result, ensure_ascii=False, indent=2)
         print(dict_result_json_dumps)
 
-
+    except (TypeError, ValueError) as e:
+        print(f'Datetime type or Value Error : {e}')
+    except RuntimeError as e:
+        print(f'Processing Error: {e}')
     except Exception as e:
         print(f'Unexpected Exception: {e}')
 
