@@ -153,7 +153,8 @@ def caesar_cipher_decode():
                 text = re.sub(r'[^a-z]', '', text)
                 # print(''.join([chr((ord(char) - ord('a') + idx) % 26 + ord('a')) for char in text]))
                 text_combination.append(
-                    ''.join([chr((ord(char) - ord('a') + idx) % character_numbers + ord('a')) for char in text]))
+                    ''.join([chr((ord(char) - ord('a') + idx) % character_numbers + ord('a')) for char in text])
+                )
 
             final_list.append(' '.join(text_combination))
             print(f'{idx}th 자릿수 해독 결과: {final_list[idx - 1]}')
@@ -185,8 +186,8 @@ if __name__ == '__main__':
     try:
 
         # 문제 1
-        mp.set_start_method("spawn", force=True)
-        print(f'success: {unlock_process()}')
+        # mp.set_start_method("spawn", force=True)
+        # print(f'success: {unlock_process()}')
 
         # 문제 2
         caesar_cipher_decode()
