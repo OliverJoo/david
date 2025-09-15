@@ -63,7 +63,7 @@ def caesar_cipher_decode_lower_only():
         character_numbers = 26
         print("\\n--- 영문 소문자만 복호화 ---")
 
-        print(list(target_text))
+        # print(list(target_text))
         for idx in range(1, character_numbers + 1):
             decrypted_chars = []
             for char in target_text:
