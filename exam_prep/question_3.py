@@ -32,7 +32,7 @@ def main():
     except (TypeError, ValueError):
         print(f'Input Value Error.')
     except Exception as e:
-        print(f'Unexpected Error: {e}') # -> 익셉션의 프린트문 표기는 {e}는 없애고 제출했던거같아요. 하지만 프로그래밍도중에 무슨 에러가 나오는지 보느라 {e}를 넣어놨었죠.
+        print(f'Unexpected Error: {e}')
 
 if __name__ == '__main__':
     main()
