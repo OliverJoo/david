@@ -84,6 +84,7 @@ def main():
         # print(f'\n\n=== dictionary type:04 (json.dumps) ===')
         # NOTI: maybe? : json.dumps(dict_result, ensure_ascii=False, indent=2)
         dict_result_json_dumps = json.dumps(dict_result, ensure_ascii=False, indent=2)
+        json.dumps(dict_result, ensure_ascii=False, indent=2)
         print(dict_result_json_dumps)
 
     except (TypeError, ValueError) as e:

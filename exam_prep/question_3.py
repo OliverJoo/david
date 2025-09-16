@@ -6,8 +6,8 @@ material_dict = {
     '탄소강': 7.85
 }
 
-def sphere_area(): # 여기는 문제 요구사항에 나온거 복붙했었어요 ㅋㅋㅋ
-    return round('면적', 3), round('무게', 3) # 이런식?
+def sphere_area():
+    return round('면적', 3), round('무게', 3)
 
 def main():
     try:
