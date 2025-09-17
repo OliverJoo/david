@@ -11,9 +11,9 @@ def sphere_area():
 
 def main():
     try:
-        diameter = float(input('지름을 입력하시오').strip())
-
-        if not isinstance(diameter, int) and diameter <= 0:
+        diameter = input('지름을 입력하시오').strip()
+        diameter = float(diameter)
+        if not isinstance(diameter, float) and diameter <= 0:
             raise ValueError
 
         material = input('재질 입력').strip()
@@ -23,7 +23,6 @@ def main():
         thickness = input('두께를 입력하시오').strip()
         if thickness == '':
             thickness = 1.0
-
         if not isinstance(thickness, float) and thickness <= 0:
             raise ValueError
 
