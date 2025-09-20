@@ -101,6 +101,7 @@ def main():
         all_df = pd.concat([train_df, test_df], ignore_index=True)
         print("\n\nCombined DataFrame Info:")
         print(all_df.info())
+        print(f'\nTotal Len: {len(all_df)}')
 
     except (FileNotFoundError, IOError) as e:
         print(f'File not found : {e}')
