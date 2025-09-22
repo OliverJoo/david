@@ -1,0 +1,30 @@
+from flask import Flask, render_template
+import socket
+
+app = Flask(__name__)
+
+@app.route("/")
+def home(): 
+    if app.debug:
+        hostname = '컴퓨터(인스턴스) : ' + socket.gethostname()
+    else:
+        hostname = ' '
+    return render_template("templates/index.html", computername=hostname)
+
+@app.route("/about")
+def about():
+    return "<h2>이것은 소개 페이지입니다.</h2>"
+
+@app.route("/menu")
+def menu():
+    return render_template("templates/menu.html")
+
+@app.route("/test1")
+def test1():
+    return render_template('test1.html')
+    
+if __name__ == "__main__":
+    app.run(debug=True, port=5001) 
+    # app.run(host='0.0.0.0', port=5001) 
+    # 0.0.0.0 은 전체 네트워크 인터페이스에 연결하라는 의미로서, 내부망 노출로 인한 보안위험성
+    # port:80 은 http 통신의 표준포트로서 포트충돌이 가능성이 있는 1024번 이하의 포트에 속한다. 
