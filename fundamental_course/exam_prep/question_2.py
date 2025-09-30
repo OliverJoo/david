@@ -95,59 +95,10 @@ def caesar_cipher_decode_lower_only():
         print(f'[에러] caesar_cipher_decode_lower_only: {e}')
 
 
-def caesar_cipher_decode_all_letters():
-    try:
-        target_text = CAESAR_PASSWORD_TEXT
-        final_list = []
-        character_numbers = 26
-        print("\\n--- 모든 영문자 복호화 ---")
-        for idx in range(1, character_numbers + 1):
-            decrypted_chars = []
-            for char in target_text:
-                if 'a' <= char <= 'z':
-                    shifted_char = chr((ord(char) - ord('a') + idx) % character_numbers + ord('a'))
-                    decrypted_chars.append(shifted_char)
-                elif 'A' <= char <= 'Z':
-                    shifted_char = chr((ord(char) - ord('A') + idx) % character_numbers + ord('A'))
-                    decrypted_chars.append(shifted_char)
-                else:
-                    decrypted_chars.append(char)
-
-            decrypted_text = ''.join(decrypted_chars)
-            final_list.append(decrypted_text)
-            print(f'{idx}th 자릿수 해독 결과: {final_list[idx - 1]}')
-
-        result = True
-        while result:
-            try:
-                input_text = int(input('\\n저장하고 싶은 자릿수의 숫자를 입력하세요(범위 1~26): '))
-                store_text = final_list[int(input_text) - 1]
-
-                print(f'\\n[결과] 암호 해독 저장 텍스트: {store_text}')
-                save_file(file_path=CAESAR_PASSWORD_SUCCESS_FILE, password=store_text)
-
-                result = False
-            except (ValueError, IndexError):
-                print(f'[오류] 잘못 입력 하셨습니다.')
-                continue
-
-    except Exception as e:
-        print(f'[에러] caesar_cipher_decode_all_letters: {e}')
-
 
 if __name__ == '__main__':
     try:
         # caesar_cipher_decode()
         caesar_cipher_decode_lower_only()
-        # caesar_cipher_decode_all_letters()
     except Exception as e:
         print(f'Unexpected Exception: {e}')
-
-# 제약사항
-#
-# python에서 기본 제공되는 명령어 이외의 별도의 라이브러리나 패키지를 사용해서는 안된다.
-# 단, zip 파일을 다루는 부분은 외부 라이브러리 사용 가능하다.
-# 반복 할 때마다 결과를 눈으로 확인 할 수 있어야 한다.
-# 경고 메시지 없이 모든 코드는 실행 되어야 한다.
-# 파일을 다루는 부분은 모두 예외처리가 되어 있어야 한다.
-# 암호가 확인 되었을 때 최종 암호가 result.txt로 저장되어야 한다.
