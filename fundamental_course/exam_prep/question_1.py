@@ -8,7 +8,7 @@ LOG_FILE = 'data_source/mission_computer_main.log'
 def process_log_file(file_path=LOG_FILE, encoding='utf-8'):
     try:
         with open(file_path, 'r', encoding=encoding) as file:
-            return file.readlines()
+            return file.read
     except (FileNotFoundError, IOError):
         print(f'Error: {file_path} not found')
         return []
@@ -40,14 +40,12 @@ def main():
             log_data = logs.strip().split(',', 2)
             if len(log_data) == 3:
                 time_stamp, log_level, message = log_data
-                # datetime.fromisoformat(time_stamp.strip())
-                # NOTI: datetime.strptime(time_stamp.strip(), '%Y-%m-%d %H:%M:%S'):
                 if datetime.strptime(time_stamp.strip(), '%Y-%m-%d %H:%M:%S'):
                     log_list.append((time_stamp.strip(), message.strip()))
                 else:
                     raise (ValueError, TypeError)
-            # else:
-            #     raise RuntimeError(f'Processing Error')
+            else:
+                raise RuntimeError(f'Processing Error')
 
         # print(f'\n\n=== Log - Tuple List(1) ===') # no
         # print(*log_list, sep='\n')
