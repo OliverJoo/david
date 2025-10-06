@@ -3,7 +3,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 import numpy as np
 
-
 def data_check():
     iris = load_iris()
     X = iris.data
