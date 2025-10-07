@@ -153,35 +153,77 @@ class circularlist:
         return False
 
 
+def _test_circularlist_spec():
+    cl = circularlist()
+    assert len(cl) == 0
+    assert cl.get_next() is None
+
+    # 삽입 3개
+    for v in (1, 2, 3):
+        cl.insert(v)
+    assert len(cl) == 3
+    assert cl.search(2) is True
+    assert cl.search(999) is False
+
+    # 순환 확인
+    s1 = cl.get_next()
+    s2 = cl.get_next()
+    assert s1 in (1, 2, 3) and s2 in (1, 2, 3)
+
+    # 삭제: 존재 값 -> True
+    assert cl.delete(2) is True
+    assert len(cl) == 2
+    assert cl.search(2) is False
+
+    # 커서가 가리키는 노드를 삭제했을 경우 커서는 이전 노드로 이동해야 함
+    # 커서를 충분히 회전시켜 현재 커서를 특정 값으로 만든 뒤 그 값을 삭제
+    cl.insert(4)        # [?, ?, 4] (cursor=4)
+    assert cl.delete(4) is True    # cursor가 4였으므로 이전 노드로 이동
+    assert len(cl) == 2
+
+    # 실패: 미존재 값 -> False
+    assert cl.delete(42) is False
+
+    # 단일 노드 삭제 전이
+    cl2 = circularlist()
+    cl2.insert("x")
+    assert cl2.delete("x") is True
+    assert len(cl2) == 0
+    assert cl2.get_next() is None
+
+# if __name__ == "__main__":
 
 
 if __name__ == "__main__":
     # Linkedlist Test
-    ll = linkedlist()
-    ll.insert(0, "a")  # ["a"]
-    ll.insert(1, "b")  # ["a","b"]
-    ll.insert(1, "X")  # ["a","X","b"]
-    print(ll.to_list())  # ['a', 'X', 'b']
-    print(len(ll))  # 3
-    print(ll.delete(1))  # 'X' -> ["a","b"]
-    print(ll.to_list())  # ['a', 'b']
-    print(len(ll))  # 2
+    # ll = linkedlist()
+    # ll.insert(0, "a")  # ["a"]
+    # ll.insert(1, "b")  # ["a","b"]
+    # ll.insert(1, "X")  # ["a","X","b"]
+    # print(ll.to_list())  # ['a', 'X', 'b']
+    # print(len(ll))  # 3
+    # print(ll.delete(1))  # 'X' -> ["a","b"]
+    # print(ll.to_list())  # ['a', 'b']
+    # print(len(ll))  # 2
+    #
+    # print('=' * 40)
+    # # Circularlist Test
+    # cl = circularlist()
+    # print(cl.get_next())        # None (빈 리스트)
+    # cl.insert('A')              # 내부상태 - [A]
+    # cl.insert('B')              # 내부상태 - [A,B] (cursor는 2)
+    # cl.insert('C')              # 내부상태 - [A,B,C] (cursor는 3)
+    # print(len(cl))              # 3
+    # print(cl.get_next())        # A (3의 다음)
+    # print(cl.get_next())        # B
+    # print(cl.search('B'))       # True
+    # print(cl.search(999))       # False
+    # print(cl.delete('A'))       # True ('A' 삭제, cursor가 2였다면 이전 노드(1 또는 3)로 이동)
+    # print(cl.delete(2))         # False
+    # print(len(cl))              # 2
+    # print([cl.get_next() for _ in range(4)])  # 예: ['C', 'B', 'C', 'B']
+    # print(cl.delete(42))        # False (미존재)
 
-    print('=' * 40)
-    # Circularlist Test
-    cl = circularlist()
-    print(cl.get_next())        # None (빈 리스트)
-    cl.insert('A')              # 내부상태 - [A]
-    cl.insert('B')              # 내부상태 - [A,B] (cursor는 2)
-    cl.insert('C')              # 내부상태 - [A,B,C] (cursor는 3)
-    print(len(cl))              # 3
-    print(cl.get_next())        # A (3의 다음)
-    print(cl.get_next())        # B
-    print(cl.search('B'))       # True
-    print(cl.search(999))       # False
-    print(cl.delete('A'))       # True ('A' 삭제, cursor가 2였다면 이전 노드(1 또는 3)로 이동)
-    print(cl.delete(2))         # False
-    print(len(cl))              # 2
-    print([cl.get_next() for _ in range(4)])  # 예: ['C', 'B', 'C', 'B']
-    print(cl.delete(42))        # False (미존재)
 
+    _test_circularlist_spec()
+    print("ok_circularlist_spec")
