@@ -93,9 +93,11 @@ class linkedlist:
 # -------------- 커서 기반 원형 연결 리스트: circularlist ---------------
 class _CNode:
     __slots__ = ("value", "next")
+
     def __init__(self, value, nxt=None):
         self.value = value
         self.next = nxt
+
 
 class circularlist:
     def __init__(self):
@@ -126,7 +128,7 @@ class circularlist:
         if self._cursor is None:
             return False
         cur = self._cursor
-        for _ in range(self._size):   # 원형이므로 최대 한 바퀴
+        for _ in range(self._size):  # 원형이므로 최대 한 바퀴
             if cur.value == value:
                 return True
             cur = cur.next
@@ -177,8 +179,8 @@ def _test_circularlist_spec():
 
     # 커서가 가리키는 노드를 삭제했을 경우 커서는 이전 노드로 이동해야 함
     # 커서를 충분히 회전시켜 현재 커서를 특정 값으로 만든 뒤 그 값을 삭제
-    cl.insert(4)        # [?, ?, 4] (cursor=4)
-    assert cl.delete(4) is True    # cursor가 4였으므로 이전 노드로 이동
+    cl.insert(4)  # [?, ?, 4] (cursor=4)
+    assert cl.delete(4) is True  # cursor가 4였으므로 이전 노드로 이동
     assert len(cl) == 2
 
     # 실패: 미존재 값 -> False
@@ -190,8 +192,6 @@ def _test_circularlist_spec():
     assert cl2.delete("x") is True
     assert len(cl2) == 0
     assert cl2.get_next() is None
-
-# if __name__ == "__main__":
 
 
 if __name__ == "__main__":
@@ -223,7 +223,6 @@ if __name__ == "__main__":
     # print(len(cl))              # 2
     # print([cl.get_next() for _ in range(4)])  # 예: ['C', 'B', 'C', 'B']
     # print(cl.delete(42))        # False (미존재)
-
 
     _test_circularlist_spec()
     print("ok_circularlist_spec")
