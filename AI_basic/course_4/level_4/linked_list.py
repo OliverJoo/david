@@ -195,34 +195,34 @@ def _test_circularlist_spec():
 
 
 if __name__ == "__main__":
-    # Linkedlist Test
-    # ll = linkedlist()
-    # ll.insert(0, "a")  # ["a"]
-    # ll.insert(1, "b")  # ["a","b"]
-    # ll.insert(1, "X")  # ["a","X","b"]
-    # print(ll.to_list())  # ['a', 'X', 'b']
-    # print(len(ll))  # 3
-    # print(ll.delete(1))  # 'X' -> ["a","b"]
-    # print(ll.to_list())  # ['a', 'b']
-    # print(len(ll))  # 2
-    #
-    # print('=' * 40)
-    # # Circularlist Test
-    # cl = circularlist()
-    # print(cl.get_next())        # None (빈 리스트)
-    # cl.insert('A')              # 내부상태 - [A]
-    # cl.insert('B')              # 내부상태 - [A,B] (cursor는 2)
-    # cl.insert('C')              # 내부상태 - [A,B,C] (cursor는 3)
-    # print(len(cl))              # 3
-    # print(cl.get_next())        # A (3의 다음)
-    # print(cl.get_next())        # B
-    # print(cl.search('B'))       # True
-    # print(cl.search(999))       # False
-    # print(cl.delete('A'))       # True ('A' 삭제, cursor가 2였다면 이전 노드(1 또는 3)로 이동)
-    # print(cl.delete(2))         # False
-    # print(len(cl))              # 2
-    # print([cl.get_next() for _ in range(4)])  # 예: ['C', 'B', 'C', 'B']
-    # print(cl.delete(42))        # False (미존재)
 
-    _test_circularlist_spec()
-    print("ok_circularlist_spec")
+    input_data = input()
+    # linkedlist Test
+    if input_data == '1':
+        ll = linkedlist()
+        ll.insert(0, "a")  # ["a"]
+        ll.insert(1, "b")  # ["a","b"]
+        ll.insert(1, "X")  # ["a","X","b"]
+        print(ll.to_list())  # ['a', 'X', 'b']
+        print(len(ll))  # 3
+        print(ll.delete(1))  # 'X' -> ["a","b"]
+        print(ll.to_list())  # ['a', 'b']
+        print(len(ll))  # 2
+        # print('=' * 40)
+    else:
+        # Circularlist Test
+        cl = circularlist()
+        print(cl.get_next())  # None (빈 리스트)
+        cl.insert('A')  # 내부상태 - [A]
+        cl.insert('B')  # 내부상태 - [A,B] (cursor는 2)
+        cl.insert('C')  # 내부상태 - [A,B,C] (cursor는 3)
+        print(len(cl))  # 3
+        print(cl.get_next())  # A (3의 다음)
+        print(cl.get_next())  # B
+        print(cl.search('B'))  # True
+        print(cl.search(999))  # False
+        print(cl.delete('A'))  # True ('A' 삭제, cursor가 2였다면 이전 노드(1 또는 3)로 이동)
+        print(cl.delete(2))  # False
+        print(len(cl))  # 2
+        print([cl.get_next() for _ in range(4)])  # 예: ['C', 'B', 'C', 'B']
+        print(cl.delete(42))  # False (미존재)
