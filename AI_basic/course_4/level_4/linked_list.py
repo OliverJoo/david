@@ -226,3 +226,23 @@ if __name__ == "__main__":
         print(len(cl))  # 2
         print([cl.get_next() for _ in range(4)])  # 예: ['C', 'B', 'C', 'B']
         print(cl.delete(42))  # False (미존재)
+
+
+# ===== linkedlist result =====
+# ['a', 'X', 'b']
+# 3
+# X
+# ['a', 'b']
+# 2
+
+# ===== circularlist result =====
+# None
+# 3
+# C
+# B
+# True
+# False
+# True
+# False
+# 2
+# ['C', 'B', 'C', 'B']
