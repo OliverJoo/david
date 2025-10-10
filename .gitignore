@@ -15,10 +15,10 @@ instance/*
 !instance/.gitignore
 .webassets-cache
 .env
-
+/exam_prep
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files
-__pycache__/
+__pycache__
 *.py[cod]
 *$py.class
 
