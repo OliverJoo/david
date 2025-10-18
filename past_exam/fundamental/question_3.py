@@ -1,37 +1,97 @@
-import math
+import json
+import pprint
+from datetime import datetime
 
-material_dict = {
-    '유리': 2.4,
-    '알루미늄': 2.7,
-    '탄소강': 7.85
-}
+LOG_FILE = 'data_source/mission_computer_main.log'
 
-def sphere_area():
-    return round('면적', 3), round('무게', 3)
+
+def process_log_file(file_path=LOG_FILE, encoding='utf-8'):
+    try:
+        with open(file_path, 'r', encoding=encoding) as file:
+            return file.read
+    except (FileNotFoundError, IOError):
+        print(f'Error: {file_path} not found')
+        return []
+    except UnicodeDecodeError as e:
+        print(f'File Decoding Error: {e}')
+        return []
+    except Exception as e:
+        print(f'Unexpected error: {e}')
+        return []
+
+
+# class ProcessingError(Exception):
+#     def __init__(self, message: str, stage: str, details: Optional[dict] = None):
+#         super().__init__(message)
+#         self.stage = stage
+#         self.details = details or {}
+
 
 def main():
     try:
-        diameter = input('지름을 입력하시오').strip()
-        diameter = float(diameter)
-        if not isinstance(diameter, float) and diameter <= 0:
-            raise ValueError
+        log_origin = process_log_file()
+        print(f'=== log original DataSet Structure ===')
+        print(f'{log_origin}\n\n')
 
-        material = input('재질 입력').strip()
-        if material not in material_dict.keys():
-            raise ValueError
+        # log_list = [logs.strip('\n').split(',', 2) for logs in log_origin[1:]]
 
-        thickness = input('두께를 입력하시오').strip()
-        if thickness == '':
-            thickness = 1.0
-        if not isinstance(thickness, float) and thickness <= 0:
-            raise ValueError
+        log_list = []
+        for logs in log_origin[1:]:
+            log_data = logs.strip().split(',', 2)
+            if len(log_data) == 3:
+                time_stamp, log_level, message = log_data
+                if datetime.strptime(time_stamp.strip(), '%Y-%m-%d %H:%M:%S'):
+                    log_list.append((time_stamp.strip(), message.strip()))
+                else:
+                    raise (ValueError, TypeError)
+            else:
+                raise RuntimeError(f'Processing Error')
 
-        print(diameter, material, thickness)
+        # print(f'\n\n=== Log - Tuple List(1) ===') # no
+        # print(*log_list, sep='\n')
+        # print(f'\n\n=== Log - Tuple List(2) ===') # no
+        # print('[\n' + '\n  '.join(str(item) for item in log_list) + '\n]')
+        print(f'\n\n=== Log - log_list:01 (original) ===')
+        print(f'{log_list}')
+        # print(f'\n\n=== Log - log_list:02 (formatted_log_list) ===')
+        # formatted_log_list  = "[\n" + "\n".join(f"  {item}{',' if i < len(log_list) - 1 else ''}" for i, item in enumerate(log_list) ) + "\n]"
+        # print(formatted_log_list)
+        # print(f'\n\n=== Log - log_list:03 (pprint.pprint) ===')
+        # log_list_pprint = pprint.pformat(log_list, width=120)
+        # print(log_list_pprint)
 
-    except (TypeError, ValueError):
-        print(f'Input Value Error.')
+        print(f'\n\n=== Log - reversed list:01 (original) ===')
+        reversed_list = sorted(log_list, key=lambda x: x[0], reverse=True)
+        print(reversed_list)
+        # print(f'\n\n=== Log - reversed list:02 (formatted_reversed_log_list) ===')
+        # formatted_reversed_log_list = "[\n" + "\n".join(f"  {item}{',' if i < len(reversed_list) - 1 else ''}" for i, item in enumerate(reversed_list)) + "\n]"
+        # print(formatted_reversed_log_list)
+        # print(f'\n\n=== Log - reversed list:03 (pprint.pprint) ===')
+        # formatted_reversed_log_list_pprint = pprint.pformat(reversed_list, width=120)
+        # print(formatted_reversed_log_list_pprint)
+
+        print(f'\n\n=== dictionary type:01 (original) ===') # 1st try
+        dict_result = dict(reversed_list)
+        print(dict_result)
+        # print(f'\n\n=== dictionary type:02 (formatted_log_dict) ===')  # 2nd try
+        # formatted_dict_result = "{\n" + "\n".join(f"  '{k}': '{v}'{',' if i < len(dict_result) - 1 else ''}" for i, (k, v) in enumerate(dict_result.items())) + "\n}"
+        # print(formatted_dict_result)
+        # print(f'\n\n=== dictionary type:03 (pprint.pprint) ===')
+        # dict_result_pprint = pprint.pformat(dict_result,  width=120)
+        # print(dict_result_pprint)
+        # print(f'\n\n=== dictionary type:04 (json.dumps) ===')
+        # NOTI: maybe? : json.dumps(dict_result, ensure_ascii=False, indent=2)
+        dict_result_json_dumps = json.dumps(dict_result, ensure_ascii=False, indent=2)
+        json.dumps(dict_result, ensure_ascii=False, indent=2)
+        print(dict_result_json_dumps)
+
+    except (TypeError, ValueError) as e:
+        print(f'Datetime type or Value Error : {e}')
+    except RuntimeError as e:
+        print(f'Processing Error: {e}')
     except Exception as e:
-        print(f'Unexpected Error: {e}')
+        print(f'Unexpected Exception: {e}')
+
 
 if __name__ == '__main__':
     main()
