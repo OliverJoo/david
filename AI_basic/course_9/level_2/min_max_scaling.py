@@ -122,11 +122,7 @@ class MinMaxScaler:
         return self.transform(data_rows)
 
 
-# ==================== 메인 실행 코드 ====================
 def main():
-    print('요구사항 1: 데이터 전처리 Min-Max Scaling')
-    print('=' * 80)
-
     print('\n[단계 1] 데이터 로딩')
     data = load_data_from_files('abalone.txt', 'abalone_attributes.txt')
     print(f'총 {len(data)}개의 데이터 로드 완료')
@@ -173,7 +169,6 @@ def main():
         max_val = max(values)
         print(f'{col:<20} {min_val:>12.6f} {max_val:>12.6f}')
 
-    # 7. 두 방법의 결과 일치 확인
     print('\n[단계 7] 두 방법의 결과 비교')
     is_same = True
     for i in range(len(scaled_manual)):
@@ -193,4 +188,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

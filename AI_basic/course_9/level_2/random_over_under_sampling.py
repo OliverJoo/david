@@ -117,9 +117,6 @@ def print_class_distribution(labels, title):
 
 
 def main():
-    print('요구사항 2: 데이터 전처리 Sampling')
-    print('=' * 80)
-
     print('\n[단계 1] 데이터 로딩')
     raw_data = load_data_from_files('abalone.txt', 'abalone_attributes.txt')
     print(f'총 {len(raw_data)}개의 데이터 로드 완료')
@@ -156,6 +153,5 @@ def main():
 
 
 if __name__ == '__main__':
-    # random seed 설정 (재현성을 위해)
     random.seed(42)
     main()
