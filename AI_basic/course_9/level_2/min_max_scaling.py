@@ -1,5 +1,6 @@
 import csv
 import random
+from sklearn.preprocessing import minmax_scale
 
 
 def load_data_from_files(data_file, attributes_file):
@@ -69,57 +70,57 @@ def manual_min_max_scaling(data_rows, exclude_columns=None):
     return scaled_data
 
 
-class MinMaxScaler:
-
-    def __init__(self):
-        self.min_values = {}
-        self.max_values = {}
-        self.numeric_columns = []
-
-    def fit(self, data_rows, exclude_columns=None):
-        if not data_rows:
-            return self
-
-        if exclude_columns is None:
-            exclude_columns = []
-
-        self.numeric_columns = [
-            col for col in data_rows[0].keys()
-            if col not in exclude_columns and isinstance(data_rows[0][col], (int, float))
-        ]
-
-        for col in self.numeric_columns:
-            values = [row[col] for row in data_rows]
-            self.min_values[col] = min(values)
-            self.max_values[col] = max(values)
-
-        return self
-
-    def transform(self, data_rows):
-        if not self.min_values:
-            raise ValueError('fit() 메서드를 먼저 호출해야 합니다.')
-
-        scaled_data = []
-        for row in data_rows:
-            new_row = {}
-            for col, value in row.items():
-                if col in self.numeric_columns:
-                    min_val = self.min_values[col]
-                    max_val = self.max_values[col]
-
-                    if max_val == min_val:
-                        new_row[col] = 0.0
-                    else:
-                        new_row[col] = (value - min_val) / (max_val - min_val)
-                else:
-                    new_row[col] = value
-            scaled_data.append(new_row)
-
-        return scaled_data
-
-    def fit_transform(self, data_rows, exclude_columns=None):
-        self.fit(data_rows, exclude_columns)
-        return self.transform(data_rows)
+# class MinMaxScaler:
+#
+#     def __init__(self):
+#         self.min_values = {}
+#         self.max_values = {}
+#         self.numeric_columns = []
+#
+#     def fit(self, data_rows, exclude_columns=None):
+#         if not data_rows:
+#             return self
+#
+#         if exclude_columns is None:
+#             exclude_columns = []
+#
+#         self.numeric_columns = [
+#             col for col in data_rows[0].keys()
+#             if col not in exclude_columns and isinstance(data_rows[0][col], (int, float))
+#         ]
+#
+#         for col in self.numeric_columns:
+#             values = [row[col] for row in data_rows]
+#             self.min_values[col] = min(values)
+#             self.max_values[col] = max(values)
+#
+#         return self
+#
+#     def transform(self, data_rows):
+#         if not self.min_values:
+#             raise ValueError('fit() 메서드를 먼저 호출해야 합니다.')
+#
+#         scaled_data = []
+#         for row in data_rows:
+#             new_row = {}
+#             for col, value in row.items():
+#                 if col in self.numeric_columns:
+#                     min_val = self.min_values[col]
+#                     max_val = self.max_values[col]
+#
+#                     if max_val == min_val:
+#                         new_row[col] = 0.0
+#                     else:
+#                         new_row[col] = (value - min_val) / (max_val - min_val)
+#                 else:
+#                     new_row[col] = value
+#             scaled_data.append(new_row)
+#
+#         return scaled_data
+#
+#     def fit_transform(self, data_rows, exclude_columns=None):
+#         self.fit(data_rows, exclude_columns)
+#         return self.transform(data_rows)
 
 
 def main():
@@ -154,36 +155,63 @@ def main():
     print('스케일링 완료')
     print(f'첫 번째 스케일링된 데이터: {scaled_manual[0]}')
 
-    print('\n[단계 5] 방법 2 - MinMaxScaler 클래스 사용')
-    scaler = MinMaxScaler()
-    scaled_class = scaler.fit_transform(data_without_sex)
-    print('스케일링 완료')
-    print(f'첫 번째 스케일링된 데이터: {scaled_class[0]}')
+    # print('\n[단계 5] 방법 2 - MinMaxScaler 클래스 사용')
+    # scaler = MinMaxScaler()
+    # scaled_class = scaler.fit_transform(data_without_sex)
+    # print('스케일링 완료')
+    # print(f'첫 번째 스케일링된 데이터: {scaled_class[0]}')
+    #
+    # print('\n[단계 6] 스케일링 후 데이터 통계')
+    # print(f'{"컬럼명":<20} {"최소값":>12} {"최대값":>12}')
+    # print('-' * 80)
+    # for col in scaled_manual[0].keys():
+    #     values = [row[col] for row in scaled_manual]
+    #     min_val = min(values)
+    #     max_val = max(values)
+    #     print(f'{col:<20} {min_val:>12.6f} {max_val:>12.6f}')
+    #
+    # print('\n[단계 7] 두 방법의 결과 비교')
+    # is_same = True
+    # for i in range(len(scaled_manual)):
+    #     for col in scaled_manual[i].keys():
+    #         diff = abs(scaled_manual[i][col] - scaled_class[i][col])
+    #         if diff > 1e-10:
+    #             is_same = False
+    #             break
+    #     if not is_same:
+    #         break
+    #
+    # print(f'두 방법의 결과 일치 여부: {is_same}')
 
-    print('\n[단계 6] 스케일링 후 데이터 통계')
-    print(f'{"컬럼명":<20} {"최소값":>12} {"최대값":>12}')
     print('-' * 80)
-    for col in scaled_manual[0].keys():
-        values = [row[col] for row in scaled_manual]
-        min_val = min(values)
-        max_val = max(values)
-        print(f'{col:<20} {min_val:>12.6f} {max_val:>12.6f}')
+    print('\n[단계 5] 방법 3 - sklearn.preprocessing.minmax_scale 사용')
+    feature_names = list(data_without_sex[0].keys())
+    data_array = [[row[col] for col in feature_names] for row in data_without_sex]
+    scaled_data_array = minmax_scale(data_array)
+    scaled_sklearn = [dict(zip(feature_names, row)) for row in scaled_data_array]
+    print('스케일링 완료')
+    print(f'첫 번째 스케일링된 데이터: {scaled_sklearn[0]}')
 
-    print('\n[단계 7] 두 방법의 결과 비교')
-    is_same = True
+    # print('\n[단계 6] 스케일링 후 데이터 통계 (sklearn)')
+    # print(f'{"컬럼명":<20} {"최소값":>12} {"최대값":>12}')
+    # print('-' * 80)
+    # for col in scaled_sklearn[0].keys():
+    #     values = [row[col] for row in scaled_sklearn]
+    #     min_val = min(values)
+    #     max_val = max(values)
+    #     print(f'{col:<20} {min_val:>12.6f} {max_val:>12.6f}')
+
+    print('\n[단계 7] 세 가지 방법의 결과 비교')
+    is_same_with_sklearn = True
     for i in range(len(scaled_manual)):
         for col in scaled_manual[i].keys():
-            diff = abs(scaled_manual[i][col] - scaled_class[i][col])
+            diff = abs(scaled_manual[i][col] - scaled_sklearn[i][col])
             if diff > 1e-10:
-                is_same = False
+                is_same_with_sklearn = False
                 break
-        if not is_same:
+        if not is_same_with_sklearn:
             break
-
-    print(f'두 방법의 결과 일치 여부: {is_same}')
-    print('\n요구사항 1 완료\n')
-
-    return scaled_manual, labels
+    print(f'위의 두 방법의 결과와 sklearn 사용 결과 일치 여부: {is_same_with_sklearn}')
 
 
 if __name__ == '__main__':
