@@ -2,6 +2,7 @@ import csv
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 import pandas as pd
 
+
 def main():
     # 1. 전복데이터의 성별을 데이터 -> label 에 저장
     labels = []
@@ -21,7 +22,6 @@ def main():
     print(pd_encoded_labels.describe())
     print("shape: ", pd_encoded_labels.shape)
     print(pd_encoded_labels)
-
 
     # 4. 원핫 엔코딩 진행
     # Reshape for OneHotEncoder
