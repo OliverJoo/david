@@ -11,13 +11,13 @@ class Stack:
         self._top = None
         self._size = 0
 
-    def empty(self):
+    def empty(self) -> bool:
         return self._top is None
 
     def size(self):
         return self._size
 
-    def push(self, item):
+    def push(self, item) -> bool:
         if self.size() >= self.MAX_SIZE:
             print(f'Stack is Full!')
             return False
@@ -27,7 +27,7 @@ class Stack:
         self._size += 1
         return True
 
-    def pop(self):
+    def pop(self) -> object | None:
         if self.empty():
             print('Empty Stack!')
             return None
@@ -37,7 +37,7 @@ class Stack:
         self._size -= 1
         return item
 
-    def peek(self):
+    def peek(self) -> object | None:
         if self.empty():
             print('Empty Stack!')
             return None
@@ -45,10 +45,10 @@ class Stack:
 
     def __str__(self):
         items = []
-        current = self._top
-        while current:
-            items.append(current.item)
-            current = current.next
+        cur = self._top
+        while cur:
+            items.append(cur.item)
+            cur = cur.next
         return f'Stack({items[::-1]})'
 
 
@@ -78,8 +78,7 @@ def main():
     print(f'5개 push 후 size: {stack.size()}')  # 출력: 5
     print('pop 순서:')
     while not stack.empty():
-        print(f'-> {stack.pop()}') # 출력: 데이터#5, 데이터#4, 데이터#3, 데이터#2, 데이터#1
-
+        print(f'-> {stack.pop()}')  # 출력: 데이터#5, 데이터#4, 데이터#3, 데이터#2, 데이터#1
 
     # 테스트 4: 최대 용량 체크 (10개 제한)
     print('\n[테스트 4] 최대 용량 체크')
@@ -100,33 +99,34 @@ def main():
     print('\n[테스트 6] peek의 비파괴적 특성')
     stack = Stack()
     stack.push('확인용')
-    print(f'1st peek: {stack.peek()}') # 출력: 확인용
-    print(f'2nd peek: {stack.peek()}') # 출력: 확인용
-    print(f'size 유지: {stack.size()}') # 출력: 1
+    print(f'1st peek: {stack.peek()}')  # 출력: 확인용
+    print(f'2nd peek: {stack.peek()}')  # 출력: 확인용
+    print(f'size 유지: {stack.size()}')  # 출력: 1
 
     # 테스트 7: 다양한 데이터 타입
     print('\n[테스트 7] 다양한 데이터 타입')
     stack = Stack()
-    stack.push(42) # int
-    stack.push(3.14) # float
-    stack.push([1, 2, 3]) # list
-    stack.push({'key': 'value'}) # dict
-    print(f'pop: {stack.pop()}') # 출력: {'key': 'value'}
-    print(f'pop: {stack.pop()}') # 출력: [1, 2, 3]
-    print(f'pop: {stack.pop()}') # 출력: 3.14
-    print(f'pop: {stack.pop()}') # 출력: 42
+    stack.push(42)  # int
+    stack.push(3.14)  # float
+    stack.push([1, 2, 3])  # list
+    stack.push({'key': 'value'})  # dict
+    print(f'pop: {stack.pop()}')  # 출력: {'key': 'value'}
+    print(f'pop: {stack.pop()}')  # 출력: [1, 2, 3]
+    print(f'pop: {stack.pop()}')  # 출력: 3.14
+    print(f'pop: {stack.pop()}')  # 출력: 42
 
     # 테스트 8: 교대로 push/pop
     print('\n[테스트 8] 교대로 push/pop')
     stack = Stack()
     stack.push('A')
     stack.push('B')
-    print(f'pop: {stack.pop()}') # 출력: B
+    print(f'pop: {stack.pop()}')  # 출력: B
     stack.push('C')
-    print(f'pop: {stack.pop()}') # 출력: C
-    print(f'pop: {stack.pop()}') # 출력: A
-    print(f'empty: {stack.empty()}') # 출력: True
+    print(f'pop: {stack.pop()}')  # 출력: C
+    print(f'pop: {stack.pop()}')  # 출력: A
+    print(f'empty: {stack.empty()}')  # 출력: True
     print('\n' + '=' * 60)
+
 
 if __name__ == '__main__':
     main()

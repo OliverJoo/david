@@ -113,6 +113,8 @@ class CircularList:
             self._cursor = new_node
         self._size += 1
 
+    # - delete(value) -> bool: 값이 같은 첫 노드 삭제(성공시 True, 실패시 False). 삭제 노드가 커서면 이전 노드로 이동한다. 만약 노드가 1개 있고 삭제되면 빈 상태가 된다.
+
     def delete(self, value):
         if self._cursor is None:
             return False
