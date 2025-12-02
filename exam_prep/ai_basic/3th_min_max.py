@@ -63,6 +63,7 @@ def main():
         # 요구사항 3: 스케일 결과의 상/하한 요약 출력
         print(scaled_data.describe().loc[['min', 'max']].round(6).to_dict())
 
+    # Decoding error 처리가 UnicodeDecodeError 로 안되서 UnicodeError 로 통과함. 문제가 좀 이상히디거 셍긱됨
     except (FileNotFoundError, UnicodeDecodeError) as e:
         print(e.args[0])
         return
