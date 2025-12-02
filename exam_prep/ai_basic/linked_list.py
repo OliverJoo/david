@@ -185,6 +185,10 @@ if __name__ == "__main__":
         print(ll.delete(0))  # 예상: Z (맨 앞 삭제)
         print(ll.delete(2))  # 예상: Y (맨 뒤 삭제)
         print(ll.to_list())  # 예상: ['a', 'b']
+        print(ll.delete(0))
+        print(ll.delete(0))
+        print(ll.to_list(), len(ll))
+        print(ll.delete(0))
 
     else:
         # CircularList 테스트 (기존 + 추가)

@@ -61,8 +61,7 @@ def main():
         scaled_data = minmax_manual_scale(data_to_scale)
         
         # 요구사항 3: 스케일 결과의 상/하한 요약 출력
-        summary = scaled_data.describe().loc[['min', 'max']].round(6).to_dict()
-        print(summary)
+        print(scaled_data.describe().loc[['min', 'max']].round(6).to_dict())
 
     except (FileNotFoundError, UnicodeDecodeError) as e:
         print(e.args[0])
@@ -157,5 +156,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # 주석을 해제하여 테스트 함수를 실행할 수 있습니다.
     # test()
