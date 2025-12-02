@@ -36,9 +36,9 @@ class LinkedList:
 
     def insert(self, index, value):
         if not isinstance(index, int):
-            raise TypeError('index must be int')
+            raise TypeError
         if index < 0 or index > self._size:
-            raise IndexError(f'insert index out of range: {index}')
+            raise IndexError
 
         new_node = _Node(value)
         if index == 0:
@@ -48,7 +48,7 @@ class LinkedList:
             prev = self._head
             for _ in range(index - 1):
                 if prev is None:
-                    raise RuntimeError('internal state corrupted')
+                    raise RuntimeError
                 prev = prev.next
             new_node.next = prev.next
             prev.next = new_node
@@ -57,9 +57,9 @@ class LinkedList:
 
     def delete(self, index):
         if not isinstance(index, int):
-            raise TypeError('index must be int')
+            raise TypeError
         if index < 0 or index >= self._size:
-            raise IndexError('index out of range: %s' % index)
+            raise IndexError
 
         if index == 0:
             deleted = self._head
@@ -68,10 +68,10 @@ class LinkedList:
             prev = self._head
             for _ in range(index - 1):
                 if prev is None:
-                    raise RuntimeError('internal state corrupted')
+                    raise RuntimeError
                 prev = prev.next
             if prev is None or prev.next is None:
-                raise RuntimeError('internal state corrupted')
+                raise RuntimeError
             deleted = prev.next
             prev.next = deleted.next
         self._size -= 1
